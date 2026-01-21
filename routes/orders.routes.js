@@ -67,6 +67,19 @@ router.delete("/:id", (req, res) => {
 });
 
 
+router.patch("/change-status/:id", (req, res) => {
+  const db = readDB();
+  const order = db.orders.find(o => o.id == req.params.id);
 
+  if (!order) return res.status(404).json({ message: "Order not found" });
+  if (order.status === "cancelled" || order.status === "delivered")
+    return res.status(400).json({ message: "Cannot change status" });
+
+  if (order.status === "placed") order.status = "shipped";
+  else if (order.status === "shipped") order.status = "delivered";
+
+  writeDB(db);
+  res.json(order);
+});
 
 export default router;
